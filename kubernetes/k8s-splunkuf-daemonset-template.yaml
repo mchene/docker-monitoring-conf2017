@@ -1,0 +1,42 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: splunkuniversalforwarder
+  labels:
+    tier: monitoring
+    app: splunkuf
+    version: v1
+spec:
+  template:
+    metadata:
+      labels:
+        name: splunkuf
+    spec:
+      containers:
+      - name: splunkuniversalforwarder
+        image: splunk/universalforwarder:6.5.2-monitor
+        env:
+            - name: SPLUNK_FORWARD_SERVER
+              value: <splunk_url>:9997
+            - name: SPLUNK_START_ARGS
+              value: --accept-license --answer-yes
+            - name:  SPLUNK_USER
+              value: root
+
+        volumeMounts:
+            - name: run
+              mountPath: /var/run/docker.sock
+            - name: sys
+              mountPath: /sys
+            - name: log
+              mountPath: /host
+      volumes:
+        - name: run
+          hostPath:
+              path: /var/run/docker.sock
+        - name: sys
+          hostPath:
+              path: /sys
+        - name: log
+          hostPath:
+              path: /var/lib/docker

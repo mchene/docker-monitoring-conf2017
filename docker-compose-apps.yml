@@ -1,0 +1,53 @@
+# must accept EULA the first time that the image is started
+# docker run splunk/splunk:6.5.2
+# Options on how to review the EULA and accept it: 
+# 1. docker run -it splunk/splunk:6.5.2
+# 2. Add the following environment variable: SPLUNK_START_ARGS=--accept-license
+# e.g., docker run -e "SPLUNK_START_ARGS=--accept-license" splunk/splunk 
+
+# Support for Docker Compose v3, https://docs.docker.com/compose/overview/
+# https://docs.docker.com/compose/compose-file/ for examples of Compose in particular
+# http://yaml.org/ for details on YAML
+# http://www.yamllint.com/ to check YAML
+# https://codebeautify.org/yaml-validator
+version: '3'
+services:
+  vsplunk_uf:
+    image: busybox
+    volumes:
+      - /opt/splunk/etc
+      - /opt/splunk/var
+
+  wordpress_db:
+    image: mariadb
+    hostname: wordpressdb
+    environment:
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+    labels:
+      - "sdlc=dev"
+#    logging:
+#      driver: splunk
+#      options:
+#        splunk-url: "https://192.168.99.103:8088"
+#        splunk-url: "https://127.0.0.1:8088"
+#        splunk-token: "00000000-0000-0000-0000-000000000000"
+#        splunk-insecureskipverify: "true"
+#        splunk-source: wordpressdb
+#        tag: "{{.Name}}"
+#        labels: sdlc
+#        env: "MYSQL_ROOT_PASSWORD"
+#        splunk-verify-connection: "false"
+
+  wordpress:
+    hostname: wordpress
+    image: wordpress
+    links:
+      - wordpress_db
+    ports:
+      - "80:80"
+    environment:
+      WORDPRESS_DB_HOST: wordpress_db
+      WORDPRESS_DB_PASSWORD: my-secret-pw
+    labels:
+      - "sdlc=dev"
+

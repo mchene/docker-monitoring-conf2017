@@ -1,0 +1,70 @@
+#to be tested as a DaemonSet
+# kubectl create -f /Users/mchene/github-new/docker-monitoring-conf2017/kubernetes/k8s-splunkuf-daemonset.yaml
+# sample: https://github.com/kubernetes/kubernetes/tree/master/examples/newrelic
+# sample: https://github.com/thockin/kube-demos/blob/master/daemon_sets/daemon.yaml
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: splunkuniversalforwarder
+  labels:
+    tier: monitoring
+    app: splunkuf
+    version: v1
+spec:
+  template:
+    metadata:
+      labels:
+        name: splunkuf
+    spec:
+      imagePullSecrets:
+      - name: myregistrykey
+      containers:
+      - name: splunkuniversalforwarder
+        image: mchene/universalforwarder:6.6.3-monitor
+#        image: mchene/universalforwarder:6.6.3-monitor-k8s
+#        resources:
+#            requests:
+#                cpu: 0.25 
+# http://kubernetes.io/docs/user-guide/volumes/
+#        volumes:
+#    - /var/run/docker.sock:/var/run/docker.sock:ro
+        env:
+            - name: SPLUNK_FORWARD_SERVER
+              #value: mchene-mbpr15.local:9997
+              value: 192.168.99.103:9997
+#              value: ec2-52-42-182-254.us-west-2.compute.amazonaws.com:9997
+            - name: SPLUNK_START_ARGS
+              value: --accept-license --answer-yes
+            - name:  SPLUNK_USER
+              value: root
+
+        volumeMounts:
+            - name: run
+              mountPath: /var/run/docker.sock
+            - name: sys
+              mountPath: /sys
+            - name: log
+#              mountPath: /var/log
+              mountPath: /host
+      volumes:
+        - name: run
+          hostPath:
+              path: /var/run/docker.sock
+        - name: sys
+          hostPath:
+              path: /sys
+        - name: log
+          hostPath:
+#              path: /var/log
+              path: /var/lib/docker
+
+#        volumes:
+#            - name: run
+#            hostPath:
+#                path: /var/run/docker.sock
+#            - name: sys
+#            hostPath:
+#               path: /sys
+#            - name: log
+#            hostPath:
+#                path: /var/log

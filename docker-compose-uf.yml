@@ -1,0 +1,36 @@
+# must accept EULA the first time that the image is started
+# docker run splunk/splunk:6.5.2
+# Options on how to review the EULA and accept it: 
+# 1. docker run -it splunk/splunk:6.5.2
+# 2. Add the following environment variable: SPLUNK_START_ARGS=--accept-license
+# e.g., docker run -e "SPLUNK_START_ARGS=--accept-license" splunk/splunk 
+
+# Support for Docker Compose v2, https://docs.docker.com/compose/overview/
+# https://docs.docker.com/compose/compose-file/ for examples of Compose in particular
+# http://yaml.org/ for details on YAML
+# http://www.yamllint.com/ to check YAML
+# https://codebeautify.org/yaml-validator
+version: '2'
+services:
+  vsplunk_uf:
+    image: busybox
+    volumes:
+      - /opt/splunk/etc
+      - /opt/splunk/var
+
+  splunkuniversalforwarder:
+    hostname: splunkuniversalforwarder
+    #image: splunk/universalforwarder:6.5.2
+    image: mchene/universalforwarder:6.6.3-monitor
+    environment:
+      SPLUNK_START_ARGS: --accept-license
+      SPLUNK_FORWARD_SERVER: 192.168.99.103:9997
+      SPLUNK_USER: root
+    volumes_from:
+      - vsplunk_uf
+    ports:
+      - "9000:8000"
+    volumes:
+      - /var/lib/docker/containers:/host/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+

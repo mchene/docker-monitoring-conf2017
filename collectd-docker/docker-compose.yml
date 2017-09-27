@@ -1,0 +1,21 @@
+# Support for Docker Compose v3, https://docs.docker.com/compose/overview/
+# https://docs.docker.com/compose/compose-file/ for examples of Compose in particular
+# http://yaml.org/ for details on YAML
+# http://www.yamllint.com/ to check YAML
+# https://codebeautify.org/yaml-validator
+version: '3'
+services:
+  collectd-docker:
+    hostname: collectd-docker
+    image: mchene/collectd:docker
+    environment:
+#      SPLUNK_URL: https://<splunk_host>:<hec_port>/services/collector/raw?channel=<valid_uuid>
+#      SPLUNK_URL: 172.20.20.203
+      SPLUNK_URL: https://ec2-34-212-110-173.us-west-2.compute.amazonaws.com:8088/services/collector/raw?channel=35273520-A0E0-4923-B7A0-3D2E7FE19EBF
+      HEC_TOKEN: 35273520-A0E0-4923-B7A0-3D2E7FE19EBF
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+# Troubleshooting HEC
+# curl -k https://<splunk_host>:<hec_port>/services/collector -H 'Authorization: Splunk <HEC_TOKEN>' -d '{"event":"Hello, World!"}'
+# curl -k https://ec2-34-212-110-173.us-west-2.compute.amazonaws.com:8088/services/collector -H 'Authorization: Splunk 95251204-55d6-4424-bf7a-048240bc323a' -d '{"event":"Hello, World!"}'
