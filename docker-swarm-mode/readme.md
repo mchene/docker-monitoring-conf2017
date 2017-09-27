@@ -8,9 +8,9 @@
 ## Step-by-step
 	1. Setup a new cluster:  make create_swarmmodecluster 
 		a. Or run the commands manually:
-			i.  make createnodes 
-			ii.  make initswarm 
-			iii.  make addworkernodes 
+			i. make createnodes 
+			ii. make initswarm 
+			iii. make addworkernodes 
 		b. Default configuration: 1 manager, 2 worker nodes
 		c. Default docker-machine names: swarmcluster0, swarmcluster1, swarmcluster2
 		d. SWARM Manager: swarmcluster0
@@ -64,7 +64,7 @@ https://docs.docker.com/docker-for-aws/#quickstart
 		b. Click on the "***-Manager***" Security Group
 		c. Open the required ports
 	4. (optional) Update Splunk Enterprise limits.conf to increase search concurrency which is very valuable for metric searches (mstats)
-		a. ssh -i /Users/mchene/Documents/Personal/AWS/splunk2015.pem docker@54.69.223.147
+		a. ssh -i <keypairname> docker@<nodepublicip>
 		b. vi /opt/splunk/etc/system/local/limits.conf
 		c. [search] max_searches_per_cpu=99999
 		d. /opt/splunk/bin/splunk restart

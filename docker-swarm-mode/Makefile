@@ -101,8 +101,6 @@ deploy-splunk-uf:
 		--env "SPLUNK_USER=root" \
 		--network monitoring \
 		$(DOCKER_SPLUNK_UF_IMG)
-#		--env "SPLUNK_FORWARD_SERVER=splunkenterprise:9997" \
---env "SPLUNK_FORWARD_SERVER=dockercon17-elb-1409304900.us-west-2.elb.amazonaws.com:9997"
 removesplunkuf: 
 	-docker service rm splunk-uf
 
@@ -126,16 +124,10 @@ deploy-splunkenterprise:
 		--publish 514:514/tcp \
 		--env "SPLUNK_START_ARGS=--accept-license --answer-yes --no-prompt" \
 		--env SPLUNK_ENABLE_LISTEN=9997 \
-		--env SPLUNK_ADD="index collectd -dataType metric" \
-		--env SPLUNK_ADD_1="index graphite -dataType metric" \
-		--env SPLUNK_ADD_2="tcp 2003 -sourcetype graphite_plaintext -index graphite" \
-		--env SPLUNK_ADD_3="index statsd -dataType metric" \
-		--env SPLUNK_ADD_4="udp 8125 -sourcetype statsd -index statsd" \
-		--env SPLUNK_ADD_4="tcp 9125 -sourcetype statsd -index statsd" \
-		--env SPLUNK_ADD_5="tcp 514 -sourcetype syslog -index main" \
-		--env "SPLUNK_USER=root" \
 		--network monitoring \
 		$(DOCKER_SPLUNK_ENTERPRISE_IMG)
+#		--env SPLUNK_ADD="tcp 514 -sourcetype syslog -index main" \
+#		--env "SPLUNK_USER=root" \
 #		--with-registry-auth 
 	date
 
