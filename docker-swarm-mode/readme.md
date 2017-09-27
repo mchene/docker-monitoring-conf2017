@@ -34,21 +34,17 @@
 - Remove all swarm nodes:  make removeswarm 
 
 ## Troubleshooting
-    1. | inputlookup docker_containername.csv
-
-# Splunk Metrics
-	1. (optional for metrics build) Deploy cAdvisor to monitor metrics and send metrics as statsd  to Splunk Enterprise: 
-	2. Deploy the Buttercup GO App and a few other Apps (collectd, nginx): make deployapps
-		a. Determine the IP of any node: docker-machine ip swarmcluster0
-		b. Launch Web UI, http://192.168.99.108:3040
-	2. Cleanup / teardown cluster: make setup-clean
+    1. Make sure the list of lookups are generated as they are used by the docker app:
+		- List of container names/UUID with linkage to node id and service id: | inputlookup docker_containername.csv
+		- List of all cluster node meta data: | inputlookup clusternodes.csv
+		- List of all service meta data: | inputlookup services.csv
 
 # Setup a Docker SWARM Mode Cluster on AWS
 https://docs.docker.com/docker-for-aws/#quickstart
 
 	1. Setup a docker SWARM mode cluster in AWS
 		a.  aws cloudformation create-stack --stack-name conf2017 --template-url https://editions-us-east-1.s3.amazonaws.com/aws/stable/Docker.tmpl --parameters ParameterKey=KeyName,ParameterValue=splunk2015 ParameterKey=InstanceType,ParameterValue=c4.4xlarge ParameterKey=ClusterSize,ParameterValue=3 ParameterKey=ManagerInstanceType,ParameterValue=m4.2xlarge ParameterKey=ManagerSize,ParameterValue=1 --capabilities CAPABILITY_IAM 
-			i. Result:
+			i. Sample Result:
 			rSize,ParameterValue=3 ParameterKey=ManagerInstanceType,ParameterValue=m4.2xlarge ParameterKey=ManagerSize,ParameterValue=3 --capabilities CAPABILITY_IAM
 			{
 			    "StackId": "arn:aws:cloudformation:us-west-2:269555371468:stack/dockercon17/607d14b0-23f1-11e7-b4db-503ac9841afd"
@@ -56,11 +52,9 @@ https://docs.docker.com/docker-for-aws/#quickstart
 			
 		b. Redirecting docker commands to a Manager Node
 			i. export AWS_DOCKER_MANAGER_IP=<dockerswarmmode_managernode_externalip>
-				1) E.g., 34.209.163.226, 
-				2) export AWS_DOCKER_MANAGER_IP=34.209.163.226
-			ii. ssh -i /Users/mchene/Documents/Personal/AWS/splunk2015.pem docker@$AWS_DOCKER_MANAGER_IP
+			ii. Accept certs: ssh -i <keypairname> docker@$AWS_DOCKER_MANAGER_IP
 			iii. exit
-			iv. ssh -i /Users/mchene/Documents/Personal/AWS/splunk2015.pem -NL localhost:2374:/var/run/docker.sock docker@$AWS_DOCKER_MANAGER_IP &
+			iv. ssh -i <keypairname> -NL localhost:2374:/var/run/docker.sock docker@$AWS_DOCKER_MANAGER_IP &
 			v. export DOCKER_HOST=localhost:2374
 	2. Deploy UF as global service and Splunk Enterprise as a replicated service 1/1
 		a. Create monitoring network:  make createmonitoringnetwork-aws 
@@ -69,7 +63,7 @@ https://docs.docker.com/docker-for-aws/#quickstart
 		a. From EC2 dashboard, click on EC2 host that has the "-Manager" postfix
 		b. Click on the "***-Manager***" Security Group
 		c. Open the required ports
-	4. (optional) Update limits.conf
+	4. (optional) Update Splunk Enterprise limits.conf to increase search concurrency which is very valuable for metric searches (mstats)
 		a. ssh -i /Users/mchene/Documents/Personal/AWS/splunk2015.pem docker@54.69.223.147
 		b. vi /opt/splunk/etc/system/local/limits.conf
 		c. [search] max_searches_per_cpu=99999
@@ -81,6 +75,3 @@ https://docs.docker.com/docker-for-aws/#quickstart
 		
 	5. Deploy application nodes: make deployapps
 
-
-# FAQ
-0. Running as a Priviledged container.
