@@ -1,11 +1,10 @@
-export SPLUNK_VERSION ?= 6.6.3
-export SPLUNK_TAG ?= 6.6.3-monitor
+export SPLUNK_VERSION ?= 7.0.0
+export SPLUNK_TAG ?= 7.0.0-monitor
 export DOCKER_CLUSTER_IMAGE_PATH ?= ${USER}
 
-export DOCKER_SPLUNK_ENTERPRISE_IMG ?= mchene/splunk:7.0.1-monitor
-#export DOCKER_SPLUNK_ENTERPRISE_IMG ?= mchene/splunk:6.6.3-monitor
+export DOCKER_SPLUNK_ENTERPRISE_IMG ?= splunk/splunk:7.0.0-monitor
 export DOCKER_COLLECTD_IMAGE ?= mchene/collectd:docker
-export DOCKER_SPLUNK_UF_IMG ?= mchene/universalforwarder:6.6.3-monitor
+export DOCKER_SPLUNK_UF_IMG ?= mchene/universalforwarder:7.0.0-monitor
 
 export SPLUNK_ENTERPRISE_HOST ?= splunkenterprise
 #export SPLUNK_ENTERPRISE_HOST ?= dockercon17-elb-1409304900.us-west-2.elb.amazonaws.com
