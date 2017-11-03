@@ -4,10 +4,11 @@ export DOCKER_CLUSTER_IMAGE_PATH ?= ${USER}
 
 export DOCKER_SPLUNK_ENTERPRISE_IMG ?= splunk/splunk:7.0.0-monitor
 export DOCKER_COLLECTD_IMAGE ?= mchene/collectd:docker
-export DOCKER_SPLUNK_UF_IMG ?= mchene/universalforwarder:7.0.0-monitor
+export DOCKER_SPLUNK_UF_IMG ?= splunk/universalforwarder:7.0.0-monitor
 
 export SPLUNK_ENTERPRISE_HOST ?= splunkenterprise
 #export SPLUNK_ENTERPRISE_HOST ?= dockercon17-elb-1409304900.us-west-2.elb.amazonaws.com
+export HEC_TOKEN_COLLECTD ?= 00000000-0000-0000-0000-000000000000
 
 export CLUSTER_NAME ?= swarmcluster
 # do not use dashes in the node name... will make the some of the commands fail.
@@ -39,9 +40,10 @@ initswarm:
 startswarmcluster:
 	seq 0 2 | xargs -I @ docker-machine start $(CLUSTER_NAME)@
 
+# required if pulling images from a private repo
 login:
-	(eval $$(docker-machine env $(CLUSTER_NAME)0) && docker login -u splunksupport -p demo123!)
-#	seq 0 2 | xargs -I @ docker-machine ssh $(CLUSTER_NAME)@ && docker login -u <myuserid> -p <mypwd>
+#	(eval $$(docker-machine env $(CLUSTER_NAME)0) && docker login -u <myuserid> -p <mypwd>)
+	seq 0 2 | xargs -I @ docker-machine ssh $(CLUSTER_NAME)@ && docker login -u <myuserid> -p <mypwd>
 
 removeworkernodes:
 	seq 1 2 | xargs -I @ bash -c 'eval $$(docker-machine env $(CLUSTER_NAME)@) && docker swarm leave --force' 
@@ -162,8 +164,8 @@ deploy-collectd:
 	docker service create \
 		--name=collectd \
 		--mode global \
-		--env SPLUNK_URL=https://ec2-34-212-110-173.us-west-2.compute.amazonaws.com:8088/services/collector/raw?channel=95251204-55d6-4424-bf7a-048240bc323a \
-        --env HEC_TOKEN=95251204-55d6-4424-bf7a-048240bc323a \
+		--env SPLUNK_URL=https://$(SPLUNK_ENTERPRISE_HOST):8088/services/collector/raw?channel=$(HEC_TOKEN_COLLECTD) \
+        --env HEC_TOKEN=$(HEC_TOKEN_COLLECTD) \
 		--mount "type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock" \
 		mchene/collectd:docker
 removecollectd: 

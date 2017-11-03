@@ -26,12 +26,20 @@
 		a. Or manually download each image:  make download-image-splunkenterprise  and  make download-image-spunkuf 
 	6. Deploy Splunk Enterprise and Splunk UF (as global Service):  make deploysplunk 
 		a. Confirm that the service is deployed, give it some time to download the image on each node and start the services:  docker service ls 
-	7. Confirm that you can access Splunk Enterprise
+	7. Confirm that your services are deployed: docker services ls
+	8. Login to Splunk Enterprise Web ui
 		a. Determine the IP of any node:  docker-machine ip swarmcluster0 
 		b. Launch Splunk Web UI, e.g. [Splunk Enterprise Web URL] (http://192.168.99.101:8000/)
 
+Test queries:
+- List of container names: | inputlookup docker_containername.csv
+- List of docker nodes: | inputlookup clusternodes.csv
+- List of docker services: | inputlookup services.csv
+
 ## Cleanup
-- Remove all swarm nodes:  make removeswarm 
+- Remove Splunk services (removes Splunk Enterprise and Splunk UF): make removesplunk
+- Remove volumes created on each node: make clean-volumes
+- Remove all swarm nodes: make removeswarm 
 
 ## Troubleshooting
     1. Make sure the list of lookups are generated as they are used by the docker app:
@@ -52,9 +60,9 @@ https://docs.docker.com/docker-for-aws/#quickstart
 			
 		b. Redirecting docker commands to a Manager Node
 			i. export AWS_DOCKER_MANAGER_IP=<dockerswarmmode_managernode_externalip>
-			ii. Accept certs: ssh -i <keypairname> docker@$AWS_DOCKER_MANAGER_IP
+			ii. Accept certs: ssh -i <path-to-ssh-key> docker@$AWS_DOCKER_MANAGER_IP
 			iii. exit
-			iv. ssh -i <keypairname> -NL localhost:2374:/var/run/docker.sock docker@$AWS_DOCKER_MANAGER_IP &
+			iv. ssh -i <path-to-ssh-key> -NL localhost:2374:/var/run/docker.sock docker@$AWS_DOCKER_MANAGER_IP &
 			v. export DOCKER_HOST=localhost:2374
 	2. Deploy UF as global service and Splunk Enterprise as a replicated service 1/1
 		a. Create monitoring network:  make createmonitoringnetwork-aws 
@@ -64,7 +72,7 @@ https://docs.docker.com/docker-for-aws/#quickstart
 		b. Click on the "***-Manager***" Security Group
 		c. Open the required ports
 	4. (optional) Update Splunk Enterprise limits.conf to increase search concurrency which is very valuable for metric searches (mstats)
-		a. ssh -i <keypairname> docker@<nodepublicip>
+		a. ssh -i <path-to-ssh-key> docker@<nodepublicip>
 		b. vi /opt/splunk/etc/system/local/limits.conf
 		c. [search] max_searches_per_cpu=99999
 		d. /opt/splunk/bin/splunk restart
